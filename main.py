@@ -56,7 +56,6 @@ print('--------')
 
 while True:
     for submission in subreddit.new(limit=config.reddit['maxResults']):
-        print("Test")
         tempIDS = []
         for id in db.lrange(config.redis['tempcachekey'], 0, -1):
             tempIDS.append(id.decode('UTF-8'))
@@ -64,15 +63,17 @@ while True:
         if len(tempIDS) > config.reddit['maxResults']:
             db.lpop(config.redis['tempcachekey'])
 
-        # Skip posts that have already been seen c:
-        if f"{submission.id}" in tempIDS:
-            continue
-
         print(f'Title: {submission.title}')
         print(f'Score: {submission.score}')
         print(f'ID: {submission.id}')
         print(f'URL: {submission.url}')
         print(f'Permalink: {submission.permalink}')
+
+        # Skip posts that have already been seen c:
+        if f"{submission.id}" in tempIDS:
+            print("Already seen!")
+            print('--------')
+            continue
 
         db.rpush(config.redis['tempcachekey'], submission.id)
 
