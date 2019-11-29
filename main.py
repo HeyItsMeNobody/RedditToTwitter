@@ -59,9 +59,6 @@ while True:
         tempIDS = []
         for id in db.lrange(config.redis['tempcachekey'], 0, -1):
             tempIDS.append(id.decode('UTF-8'))
-        # Get rid of first entry if list is bigger than maxResults
-        if len(tempIDS) > config.reddit['maxResults']:
-            db.lpop(config.redis['tempcachekey'])
 
         print(f'Title: {submission.title}')
         print(f'Score: {submission.score}')
@@ -69,18 +66,24 @@ while True:
         print(f'URL: {submission.url}')
         print(f'Permalink: {submission.permalink}')
 
-        # Skip posts that have already been seen c:
+        # Skip posts that have already been seen
         if f"{submission.id}" in tempIDS:
             print("Already seen!")
             print('--------')
             continue
 
-        db.rpush(config.redis['tempcachekey'], submission.id)
+        print(f'tempIDS: {tempIDS}')
+        rpushListLength = db.rpush(config.redis['tempcachekey'], submission.id)
+        # Remove first entry when list bigger than maxResults
+        print(f'rpushListLength: {rpushListLength}')
+        if (rpushListLength > config.reddit['maxResults']):
+            print ("Removing last list entry..")
+            db.lpop(config.redis['tempcachekey'])
 
         if (is_url_image(submission.url) != True):
             print(f'URL isn\'t an image!')
         else:
-            tweet_image(submission.url, f'{submission.title} | http://reddit.com{submission.permalink}')
+            #tweet_image(submission.url, f'{submission.title} | http://reddit.com{submission.permalink}')
             print('Image tweeted!')
 
         print('--------')
