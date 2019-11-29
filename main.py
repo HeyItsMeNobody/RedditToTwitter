@@ -83,7 +83,7 @@ while True:
         if (is_url_image(submission.url) != True):
             print(f'URL isn\'t an image!')
         else:
-            #tweet_image(submission.url, f'{submission.title} | http://reddit.com{submission.permalink}')
+            tweet_image(submission.url, f'{submission.title} | http://reddit.com{submission.permalink}')
             print('Image tweeted!')
 
         print('--------')
